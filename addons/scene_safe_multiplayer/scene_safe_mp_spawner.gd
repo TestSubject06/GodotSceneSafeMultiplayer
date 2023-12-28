@@ -1,5 +1,8 @@
 extends MultiplayerSpawner
-class_name SceneSafeMpSpawner
+class_name SceneSafeMpSpawner 
+## Handshakes spawnable nodes before allowing them to be spawned on remote peers.
+
+
 ## Compared to the SceneSafeMpSynchronizer, this class is miniscule. The only thing it does is
 ## register itself with the manager. This is mostly because MultiplayerSpawners don't have a lot of
 ## control over anything. They don't control visibility, and they don't control which entities are

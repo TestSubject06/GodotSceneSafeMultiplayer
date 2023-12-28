@@ -1,5 +1,8 @@
 extends MultiplayerSynchronizer
 class_name SceneSafeMpSynchronizer
+## Handshakes with remote synchronizers before allowing data to flow between remote peers.
+
+
 ## This is an extended version of the MultiplayerSynchronizer that interfaces with the
 ## SceneSafeMpManager to ensure that all peers have actually instantiated their respective
 ## synchronizers before beginning to send data to them. This prevents dreaded "Node not found"

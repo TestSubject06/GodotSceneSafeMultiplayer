@@ -23,6 +23,10 @@ SceneSafeMultiplayer="*res://addons/scene_safe_multiplayer/scene_safe_mp_manager
 
 gdscript/warnings/native_method_override=1
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/scene_safe_multiplayer/plugin.cfg")
+
 [input]
 
 move_forward={
