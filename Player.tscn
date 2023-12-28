@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://dlda36olggorl"]
+
+[ext_resource type="Script" path="res://Player.gd" id="1_xohan"]
+[ext_resource type="Script" path="res://addons/scene_safe_multiplayer/scene_safe_mp_synchronizer.gd" id="2_ubkok"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_a2gwc"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/sync = true
+properties/0/watch = false
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/sync = true
+properties/1/watch = false
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_cdijk"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/sync = false
+properties/0/watch = false
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1j1it"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_nujsa"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_end6v"]
+radius = 0.25
+height = 0.5
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_xohan")
+
+[node name="SceneSafeMpSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_a2gwc")
+script = ExtResource("2_ubkok")
+
+[node name="SharedAuthoritySynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_cdijk")
+script = ExtResource("2_ubkok")
+is_spawner_visibility_controller = true
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.0723496, 0.962902, 0.117685)
+mesh = SubResource("CapsuleMesh_1j1it")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.0723496, 0.959209, 0.117685)
+shape = SubResource("CapsuleShape3D_nujsa")
+
+[node name="Nose" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1.74917e-08, 0, 1, 0, 0.626481, 0, -0.400164, 0, -4.37114e-08, 0.0697791, 1.36423, -0.355626)
+mesh = SubResource("CapsuleMesh_end6v")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0723496, 1.55938, 0.117685)

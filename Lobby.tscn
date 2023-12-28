@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://dl7g6ss0msbnv"]
+
+[ext_resource type="Script" path="res://Lobby.gd" id="1_nxqmq"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nxqmq")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Direct Connect"
+
+[node name="Button" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Host"
+
+[node name="Address" type="LineEdit" parent="HBoxContainer"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+placeholder_text = "Address"
+
+[node name="Port" type="LineEdit" parent="HBoxContainer"]
+layout_mode = 2
+placeholder_text = "Port"
+
+[node name="Button2" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Connect"
+
+[connection signal="pressed" from="HBoxContainer/Button" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="HBoxContainer/Button2" to="." method="_on_connect_pressed"]

@@ -1,0 +1,61 @@
+[gd_scene load_steps=10 format=3 uid="uid://cjkw132lbhjv6"]
+
+[ext_resource type="Script" path="res://Scene2.gd" id="1_xxth8"]
+[ext_resource type="Script" path="res://addons/scene_safe_multiplayer/scene_safe_mp_spawner.gd" id="2_jbmea"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lf518"]
+size = Vector3(15.8881, 0.236848, 15.9364)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t0sbg"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_8motr"]
+
+[sub_resource type="Sky" id="Sky_h22rw"]
+sky_material = SubResource("ProceduralSkyMaterial_8motr")
+
+[sub_resource type="Environment" id="Environment_kyvgl"]
+background_mode = 2
+sky = SubResource("Sky_h22rw")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_u7arf"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_7dr2p"]
+
+[node name="Scene2" type="Node3D"]
+script = ExtResource("1_xxth8")
+
+[node name="SceneSafeMpSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Player.tscn")
+spawn_path = NodePath("../Multiplayer")
+script = ExtResource("2_jbmea")
+
+[node name="Multiplayer" type="Node" parent="."]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_lf518")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(15.8965, 0, 0, 0, 0.227115, 0, 0, 0, 15.716, 0, 0, 0)
+mesh = SubResource("BoxMesh_t0sbg")
+skeleton = NodePath("../..")
+
+[node name="PlayerSpawn" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.79717, 0.875969)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_kyvgl")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(1, 0, 0, 0, 0.371659, 0.928369, 0, -0.928369, 0.371659, 0, 3.15055, 0)
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.24865, 1.10821, 6.49735)
+mesh = SubResource("CylinderMesh_u7arf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.52003, 1.02549, 6.41142)
+shape = SubResource("CylinderShape3D_7dr2p")
