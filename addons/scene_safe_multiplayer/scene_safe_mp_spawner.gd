@@ -18,19 +18,26 @@ class_name SceneSafeMpSpawner
 ## ensure proper synchronization, any entity spawned by a SceneSafeMpSpawner MUST have at least one
 ## SceneSafeMpSynchronizer with the `is_spawner_visibility_controller` property set to true.
 
+## This will be emitted from the remote_spawner_ready signal to help you differentiate which spawner
+## is ready. It's optional.
+@export
+var spawner_name := "";
+
 ## Register the spawner
 func _ready():
 	SceneSafeMultiplayer.register_spawner(
+			spawner_name,
 			get_path(), 
 			multiplayer.get_unique_id(), 
-			get_multiplayer_authority()
+			get_multiplayer_authority(),
 	);
 
 
 ## Unreguster the spawner
 func _exit_tree():
 	SceneSafeMultiplayer.unregister_spawner(
+			spawner_name,
 			get_path(), 
 			multiplayer.get_unique_id(), 
-			get_multiplayer_authority()
+			get_multiplayer_authority(),
 	);

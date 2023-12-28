@@ -24,6 +24,7 @@ script = ExtResource("1_xnc1b")
 _spawnable_scenes = PackedStringArray("res://Player.tscn")
 spawn_path = NodePath("../Multiplayer")
 script = ExtResource("2_436sx")
+spawner_name = null
 
 [node name="Multiplayer" type="Node" parent="."]
 

@@ -23,14 +23,14 @@ func _process(_delta):
 	if(Input.is_action_pressed("load_scene_1")):
 		get_tree().change_scene_to_packed(load("res://Scene1.tscn"));
 	
-func spawn_player(spawner_node_path: String, peer_id: int):
+func spawn_player(spawner_name: String, spawner_node_path: String, peer_id: int):
 	var spawn_data = {"id": peer_id};
 	if(is_node_ready() && get_tree().current_scene.has_node(spawner_node_path)):
 		get_tree().current_scene.get_node(spawner_node_path).spawn(spawn_data);
 	else:
 		spawn_queue.push_back(spawn_data);
 
-func remove_player(spawner_node_path: String, peer_id: int):
+func remove_player(spawner_name: String, spawner_node_path: String, peer_id: int):
 	print("removing player ", peer_id, " from ", spawner_node_path);
 	if(is_node_ready() && get_tree().current_scene.has_node(spawner_node_path)):
 		var spawner: SceneSafeMpSpawner = get_tree().current_scene.get_node(spawner_node_path);
