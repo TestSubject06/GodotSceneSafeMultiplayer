@@ -8,6 +8,7 @@ func _ready():
 	spawner.peer_ready.connect(spawn_player);
 	spawner.peer_removed.connect(remove_player);
 	spawner.flush_missed_signals();
+	multiplayer.peer_disconnected.connect(remove_player);
 	pass # Replace with function body.
 
 
@@ -26,7 +27,8 @@ func spawn_player(peer_id: int):
 	
 	
 func remove_player(peer_id: int):
-	$Multiplayer.get_node(str(peer_id)).queue_free();
+	if $Multiplayer.has_node(str(peer_id)):
+		$Multiplayer.get_node(str(peer_id)).queue_free();
 
 func player_spawner(data: Dictionary):
 	print("Spawning player: ", data.id);
