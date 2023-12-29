@@ -1,13 +1,13 @@
 extends Node3D
 
-func _enter_tree():
-	SceneSafeMultiplayer.remote_spawner_ready.connect(spawn_player);
-	SceneSafeMultiplayer.remote_spawner_removed.connect(remove_player);
-	
-
+@onready var spawner: SceneSafeMpSpawner = $SceneSafeMpSpawner;
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$SceneSafeMpSpawner.spawn_function = player_spawner;
+	spawner.spawn_function = player_spawner;
+	
+	spawner.peer_ready.connect(spawn_player);
+	spawner.peer_removed.connect(remove_player);
+	spawner.flush_missed_signals();
 	pass # Replace with function body.
 
 
@@ -20,18 +20,13 @@ func _process(_delta):
 
 # We wrap this in a deferred lambda expression because when the authority's spawner confirms itself
 # and emits the signal, the scene itself isn't actually ready yet.
-func spawn_player(spawner_name: String, spawner_node_path: String, peer_id: int):
-	(func ():
-		var spawn_data = {"id": peer_id};
-		if(is_node_ready() && get_tree().current_scene.has_node(spawner_node_path)):
-			get_tree().current_scene.get_node(spawner_node_path).spawn(spawn_data);
-	).call_deferred();
+func spawn_player(peer_id: int):
+	var spawn_data = {"id": peer_id};
+	$SceneSafeMpSpawner.spawn(spawn_data);
 	
 	
-func remove_player(spawner_name: String, spawner_node_path: String, peer_id: int):
-	if(is_node_ready() && get_tree().current_scene.has_node(spawner_node_path)):
-		var spawner: SceneSafeMpSpawner = get_tree().current_scene.get_node(spawner_node_path);
-		spawner.get_node(spawner.spawn_path).get_node(str(peer_id)).queue_free();
+func remove_player(peer_id: int):
+	$Multiplayer.get_node(str(peer_id)).queue_free();
 
 func player_spawner(data: Dictionary):
 	print("Spawning player: ", data.id);
