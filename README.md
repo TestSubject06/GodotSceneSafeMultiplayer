@@ -82,7 +82,14 @@ These nodes won't allow you to have sets of players freely moving around and exi
 ## FAQ
 
 ### Why am I getting errors printed to the console when peers switch scenes?
-blah blah answer the question.
+
+When a peer changes scenes, like in the example project in this repository, that peer will receive falling-edge errors: `on_despawn_receive ...` and `Node not found root/.../SceneSafeMpSynchronizer`. This is normal and expected behavior. Essentialy what happens is the peer removes the associated synchronizer(s), spawner(s), and spawned scenes - while at the same time emitting an RPC that it has done so. However, there will still be in-flight packets destined for those removed synchronizers resulting in the `Node not found` errors. 
+
+Additionally, when the authority of a spawner receives the notification that a peer has broken the handshake the authority will remove the peer from the _handshake-based_ visibility list, which will try to trigger a despawn on the remote peer who just broke the handshake. This is normal behavior from the underlying `MultiplayerSpawner` instance, but the peer on the other end doesn't have the node anymore. This results in the `on_despawn_receive` error.
+
+Neither of these errors are harmful to the running of the game, they're no-ops and just there to inform you that something _unusual_ happened - from the perspective of the underlying spawner and synchronizer nodes. If the peer returns to the original scene and handshakes that it's ready - the visibility will be restored and the peer will receive both the spawned scene and any new synchronizer events.
+
+Without the handshaking in this plugin these failures would be leading edge errors that would prevent future packets from flowing if the visibility wasn't managed otherwise.
 
 # API Documentation
 
@@ -130,4 +137,6 @@ We **CANNOT** use the `public_visibility` property directly, because the `SceneS
 
 This is an overridden native method to set the _intentional_ visibility for a specific peer. This is changed to ensure it works correctly with the _handshake-based_ visibility filtering as well. You **MUST** call this when referencing a cast `SceneSafeMpSynchronizer` to ensure the correct version is called: `($SceneSafeMpSynchronizer as SceneSafeMpSynchronizer).set_visibility_for( ... )`.
 
+## SceneSafeMultiplayerManager
 
+This autoload exists as a shared data storage and stable RPC recipient for the two nodes. It should not be directly interacted with, unless you're modifying it for your own purposes.
