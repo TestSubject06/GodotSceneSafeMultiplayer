@@ -78,3 +78,28 @@ Note however that there are two signals attached to the `remove_player` function
 
 ## What this plugin can't do
 These nodes won't allow you to have sets of players freely moving around and existing in different scenes. While these handshakes _could_ allow that, there's a huge amount of work that would have to be done on top of these nodes to handle re-assigning authority of a scene if the current authority leaves, and cleanup if everyone leaves. The example project here allows each peer (including the host/authority) to freely move between scenes - but peers without an authority present are essentially suspended in a void until the authority arrives to provide them with their player spawns. The name of the game here is _eventual consistency_.
+
+## FAQ
+
+### Why am I getting errors printed to the console when peers switch scenes?
+blah blah answer the question.
+
+## API Documentation
+
+### SceneSafeMpSpawner
+
+#### Signals
+
+`peer_ready (peer_id: int)`
+
+This signal is only emitted on the **authority** when a peer has confirmed this spawner has been added to the scene. This signal is emitted with one piece of data: an `int` representing the id of the peer that has confirmed the handhake of the associated spawner. This signal does emit for the authority itself, and does so immediately.
+
+It is possible to receive a spawn signal for a spawner that the authority no longer has, for example if the remote peers are split between two scenes, and a new peer joins a scene that the authority is no longer present in. A bit contrived, and definitely not generally supported, but possible.
+
+---
+
+`peer_removed (peer_id: int)`
+
+This signal is only emitted on the **authority** when a peer has removed this spawner from their node tree. For example, by transitioning scenes. This is **not emitted** when a peer is disconnected, only when the handhake for the associated spawner is intentionally broken by the peer. This signal is emitted with one piece of data: an `int` representing the id of the peer that has confirmed the removal of the associated spawner. This signal does emit for the authority itself, but it's uninteresting if the reason it's being emitted is a scene transition - rather than a spawner cleanup.
+
+Like the `peer_ready` signal, it is possible to receive an emission for a spawner that is no longer present on the authority.
