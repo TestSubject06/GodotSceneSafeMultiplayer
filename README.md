@@ -39,5 +39,5 @@ Now that we have a scene with a spawner and a spawnable scene with a synchronize
 This tells us that a remote peer has finished adding a spawner to their scene tree. The godot multiplayer tutorials add new player spawns as a part of the `peer_connected` signal, but when using these nodes, we make sure our peer is actually ready to receive.
 
 
-## What these can't do
+## What this plugin can't do
 These nodes won't allow you to have sets of players freely moving around and existing in different scenes. While these handshakes _could_ allow that, there's a huge amount of work that would have to be done on top of these nodes to handle re-assigning authority of a scene if the current authority leaves, and cleanup if everyone leaves. The example project here allows each peer (including the host/authority) to freely move between scenes - but peers without an authority present are essentially suspended in a void until the authority arrives to provide them with their player spawns. The name of the game here is _eventual consistency_.
