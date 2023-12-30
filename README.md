@@ -35,9 +35,46 @@ Our spawner won't do much on its own, so you'll need a scene with at least one S
 
 The authority owned synchronizer must synchronize something - anything, even if the spawn and sync checkboxes are both disabled. It just has to have something in the replication panel or Godot won't process it, and the plugin won't work.
 
-Now that we have a scene with a spawner and a spawnable scene with a synchronizer set up... TODO: draw the rest of the owl.
-This tells us that a remote peer has finished adding a spawner to their scene tree. The godot multiplayer tutorials add new player spawns as a part of the `peer_connected` signal, but when using these nodes, we make sure our peer is actually ready to receive.
+Now that we have a scene with a spawner and a spawnable scene with a synchronizer set up we need to attach to the SceneSafeMpSpawner's signals to let us know when peers are ready to receive spawns:
+```
+extends Node3D
 
+@onready var spawner: SceneSafeMpSpawner = $SceneSafeMpSpawner as SceneSafeMpSpawner;
+
+func _ready():
+	spawner.spawn_function = player_spawner;
+	
+	if is_multiplayer_authority():
+		spawner.peer_ready.connect(spawn_player);
+		spawner.peer_removed.connect(remove_player);
+		spawner.flush_missed_signals();
+		multiplayer.peer_disconnected.connect(remove_player);
+
+
+func spawn_player(peer_id: int):
+	var spawn_data = {"id": peer_id};
+	$SceneSafeMpSpawner.spawn(spawn_data);
+	
+	
+func remove_player(peer_id: int):
+	if $Multiplayer.has_node(str(peer_id)):
+		$Multiplayer.get_node(str(peer_id)).queue_free();
+```
+
+We call `spawner.flush_missed_signals()` because the scene's `_ready()` function is executed _after_ the SceneSafeMpSpawner's `_ready()` function. This means that if the multiplayer authority is itself a player in the game, the `peer_ready` signal would have been emitted before the signal was connected in the scene, so the spawner keeps track of signals that would have been emitted when there were no listeners and saves them for later. The SceneSafeMultiplayer autoload handles the rest for us:
+
+1. The multiplayer peer confirms the existence of the spawner.
+2. The authority spawns the player's scene locally, including the two synchronizers.
+3. The spawned scene's synchronizer with `is_spawner_visibility_controller` set to true links with the parent spawner.
+4. At the same time, the synchronizer that the peer owns is registered and a notification is sent to the remote peer for later.
+5. When the synchronizer links with the spawner, it sees that there is a confirmed peer on the other end for the parent spawner.
+6. The visibility controller synchronizer enables visibility for the confirmed peer, which allows the underlying MultiplayerSpawner to replicate the instance to the peer.
+7. The peer receives their spawn and registers the synchronizer that they own.
+8. The synchronizer owned by the peer picks up on the waiting notification from the spawner authority that the synchronizer on the other end is ready and waiting.
+9. The visibility is enabled from the peer to the multiplayer authority.
+10. All other ready peers simultaneously receive a copy of the spawn and similarly notify the synchronizer's owner that they're ready to receive data.
+
+Note however that there are two signals attached to the `remove_player` function - `multiplayer.peer_disconnected` and `spawner.peer_removed`. The spawner's `peer_removed` signal does not account for the peer exiting the game abruptly, it only accounts for the spawner calling the `_exit_tree()` lifecycle method. You still need to handle `peer_disconnected` to remove the player in the event that the player suddenly disconnects. And in doing so, you must also take care to not to try and delete entities that don't exist - as `peer_disconnected` doesn't care where the peer was when it disconnected. It may not have been ready in the first place.
 
 ## What this plugin can't do
 These nodes won't allow you to have sets of players freely moving around and existing in different scenes. While these handshakes _could_ allow that, there's a huge amount of work that would have to be done on top of these nodes to handle re-assigning authority of a scene if the current authority leaves, and cleanup if everyone leaves. The example project here allows each peer (including the host/authority) to freely move between scenes - but peers without an authority present are essentially suspended in a void until the authority arrives to provide them with their player spawns. The name of the game here is _eventual consistency_.
