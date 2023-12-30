@@ -66,10 +66,10 @@ We call `spawner.flush_missed_signals()` because the scene's `_ready()` function
 1. The multiplayer peer confirms the existence of the spawner.
 2. The authority spawns the player's scene locally, including the two synchronizers.
 3. The spawned scene's synchronizer with `is_spawner_visibility_controller` set to true links with the parent spawner.
-4. At the same time, the synchronizer that the peer owns is registered and a notification is sent to the remote peer for later.
-5. When the synchronizer links with the spawner, it sees that there is a confirmed peer on the other end for the parent spawner.
+4. At the same time, the synchronizer that the peer owns is registered and a notification from the authority is sent to the peer for later.
+5. When the synchronizer links with the spawner, it sees that there is a confirmed peer on the other end for the authority owned spawner.
 6. The visibility controller synchronizer enables visibility for the confirmed peer, which allows the underlying MultiplayerSpawner to replicate the instance to the peer.
-7. The peer receives their spawn and registers the synchronizer that they own.
+7. The peer receives their spawned scene and registers the two synchronizers.
 8. The synchronizer owned by the peer picks up on the waiting notification from the spawner authority that the synchronizer on the other end is ready and waiting.
 9. The visibility is enabled from the peer to the multiplayer authority.
 10. All other ready peers simultaneously receive a copy of the spawn and similarly notify the synchronizer's owner that they're ready to receive data.
