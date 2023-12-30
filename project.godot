@@ -23,6 +23,11 @@ SceneSafeMultiplayer="*res://addons/scene_safe_multiplayer/scene_safe_mp_manager
 
 gdscript/warnings/native_method_override=1
 
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=480
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/scene_safe_multiplayer/plugin.cfg")

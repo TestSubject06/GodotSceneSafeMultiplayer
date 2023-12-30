@@ -3,11 +3,6 @@ class_name SceneSafeMpSpawner
 ## Handshakes spawnable nodes before allowing them to be spawned on remote peers.
 
 
-## Compared to the SceneSafeMpSynchronizer, this class is miniscule. The only thing it does is
-## register itself with the manager. This is mostly because MultiplayerSpawners don't have a lot of
-## control over anything. They don't control visibility, and they don't control which entities are
-## replicated across the wire. They lean on the synchronizers that they create to do so.
-
 ## The authority does not receive spawn entity signal emissions for a peer until the peer has 
 ## confirmed the existence of the matching spawner.
 
@@ -38,6 +33,9 @@ signal peer_ready;
 signal peer_removed;
 
 
+## Especially with a peer that is also the host, it's possible for a signal to be fired before the
+## host's ready function is called. So the spawner holds missed signals until flush_missed_signals
+## is called. A ready and a remove will cancel out and remove themselves from the missed signals.
 var _missed_ready_signals: Array[int] = [];
 var _missed_removed_signals: Array[int] = [];
 
@@ -60,17 +58,33 @@ func _exit_tree():
 	);
 
 
+## Intended to be called by the SceneSafeManager autoload. Lets this spawner know that a peer
+## is ready to receive their spawn.
 func activate_ready_singal(peer: int):
-	if(peer_ready.get_connections().size() == 0):
+	if peer_ready.get_connections().size() == 0:
 		_missed_ready_signals.push_back(peer);
+		
+		# If there was already a removed signal pending, then just clear them both.
+		if _missed_removed_signals.has(peer):
+			_missed_ready_signals.erase(peer);
+			_missed_removed_signals.erase(peer);
 	else:
 		peer_ready.emit(peer);
-	
+
+
+## Intended to be called by the SceneSafeManager autoload. Lets this spawner know that a peer should
+## be removed from consideration.
 func activate_removed_signal(peer: int):
-	if(peer_removed.get_connections().size() == 0):
+	if peer_removed.get_connections().size() == 0:
 		_missed_removed_signals.push_back(peer);
+		
+		# If there was already a ready signal pending, just clear them both.
+		if _missed_ready_signals.has(peer):
+			_missed_ready_signals.erase(peer);
+			_missed_removed_signals.erase(peer);
 	else:
 		peer_removed.emit(peer);
+
 
 func flush_missed_signals():
 	for peer in _missed_ready_signals:

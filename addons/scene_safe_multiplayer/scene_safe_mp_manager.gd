@@ -2,8 +2,8 @@ extends Node
 class_name SceneSafeMpManager
 ## This is a manager class designed to live as an autoloaded script with the name 
 ## `SceneSafeMultiplayer`. Everything that happens in here is automatically handled by the bundled
-## SceneSafeMpSpawner and SceneSafeMpSynchronizer nodes. You are only intended to interface with the
-## signals provided.
+## SceneSafeMpSpawner and SceneSafeMpSynchronizer nodes. You are not intended to directly interface
+## with anything in this class, do so at your own risk.
 
 
 ## Stores a collection of node paths, and which peers have confirmed that they contain said nodes.
