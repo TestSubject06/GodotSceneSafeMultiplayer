@@ -1,15 +1,16 @@
 extends Node3D
 
-@onready var spawner: SceneSafeMpSpawner = $SceneSafeMpSpawner;
+@onready var spawner: SceneSafeMpSpawner = $SceneSafeMpSpawner as SceneSafeMpSpawner;
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	spawner.spawn_function = player_spawner;
 	
-	spawner.peer_ready.connect(spawn_player);
-	spawner.peer_removed.connect(remove_player);
-	spawner.flush_missed_signals();
-	multiplayer.peer_disconnected.connect(remove_player);
-	pass # Replace with function body.
+	if is_multiplayer_authority():
+		spawner.peer_ready.connect(spawn_player);
+		spawner.peer_removed.connect(remove_player);
+		spawner.flush_missed_signals();
+		multiplayer.peer_disconnected.connect(remove_player);
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -19,8 +20,7 @@ func _process(_delta):
 	if(Input.is_action_pressed("load_scene_1")):
 		get_tree().change_scene_to_packed(load("res://Scene1.tscn"));
 
-# We wrap this in a deferred lambda expression because when the authority's spawner confirms itself
-# and emits the signal, the scene itself isn't actually ready yet.
+
 func spawn_player(peer_id: int):
 	var spawn_data = {"id": peer_id};
 	$SceneSafeMpSpawner.spawn(spawn_data);
