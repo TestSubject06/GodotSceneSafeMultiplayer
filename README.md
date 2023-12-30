@@ -84,22 +84,50 @@ These nodes won't allow you to have sets of players freely moving around and exi
 ### Why am I getting errors printed to the console when peers switch scenes?
 blah blah answer the question.
 
-## API Documentation
+# API Documentation
 
-### SceneSafeMpSpawner
+## SceneSafeMpSpawner
 
-#### Signals
+### Signals
 
-`peer_ready (peer_id: int)`
+`peer_ready ( peer_id: int )`
 
 This signal is only emitted on the **authority** when a peer has confirmed this spawner has been added to the scene. This signal is emitted with one piece of data: an `int` representing the id of the peer that has confirmed the handhake of the associated spawner. This signal does emit for the authority itself, and does so immediately.
 
 It is possible to receive a spawn signal for a spawner that the authority no longer has, for example if the remote peers are split between two scenes, and a new peer joins a scene that the authority is no longer present in. A bit contrived, and definitely not generally supported, but possible.
 
----
-
-`peer_removed (peer_id: int)`
+`peer_removed ( peer_id: int )`
 
 This signal is only emitted on the **authority** when a peer has removed this spawner from their node tree. For example, by transitioning scenes. This is **not emitted** when a peer is disconnected, only when the handhake for the associated spawner is intentionally broken by the peer. This signal is emitted with one piece of data: an `int` representing the id of the peer that has confirmed the removal of the associated spawner. This signal does emit for the authority itself, but it's uninteresting if the reason it's being emitted is a scene transition - rather than a spawner cleanup.
 
 Like the `peer_ready` signal, it is possible to receive an emission for a spawner that is no longer present on the authority.
+
+### Method Descriptions
+
+`void flush_missed_signals( )`
+
+When a `SceneSafeMpSpawner` is registered in an authority's scene tree, the `SceneSafeMultiplayer` singleton instructs it to emit ready signals for any peers that are already confirmed. This is sometimes done before the scene itself has become `_ready`, in which case the signals are not completely missed - but are instead stored until the signals are connected later. Once you've connected the signals, call this function to flush out any signals that may have been missed by the authority while building out the scene tree.
+
+## SceneSafeMpSynchronizer
+
+### Property Descriptions
+
+`bool is_spawner_visibility_controller = false`
+
+Controls whether this synchronizer is used to share authority with, and control spawns from a `SceneSafeMpSpawner` node. If true, then this synchronizer's visibility will be controlled by the authority to manage node spawns between connected peers. One, and only one, synchronizer **MUST** be marked as a spawner visibility controller in each spawnable scene, or the authority will not be able to send spawned entities to remote peers.
+
+`bool public_visibility = false`
+
+You **MUST NOT** use the `public_visibility` property directly. This will break the handshaking process and undermine all benefits gained from this plugin. Use the `set_public_visibility` method instead.
+
+### Method Descriptions
+
+`void set_public_visibility ( visible: bool )`
+
+We **CANNOT** use the `public_visibility` property directly, because the `SceneSafeMpSynchronizer` handles two separate streams of visibility: _handshake-based_ visibility and _intentional_ visibility. These two visibility streams are automatically managed and combined into one and sent to the underlying `MultiplayerSynchronizer` instance. The _handshake-based_ visibility is managed by the `SceneSafeMultiplayer` singleton.
+
+`void set_visibility_for ( peer_id: int, visible: bool )`
+
+This is an overridden native method to set the _intentional_ visibility for a specific peer. This is changed to ensure it works correctly with the _handshake-based_ visibility filtering as well. You **MUST** call this when referencing a cast `SceneSafeMpSynchronizer` to ensure the correct version is called: `($SceneSafeMpSynchronizer as SceneSafeMpSynchronizer).set_visibility_for( ... )`.
+
+
