@@ -33,6 +33,7 @@ var synchronizer_map = {};
 ## in all of the maps, especially from any linked_synchronizers.
 func _ready():
 	multiplayer.peer_disconnected.connect(_cleanup_peer_data);
+	multiplayer.server_disconnected.connect(cleanup_all_data);
 
 
 ## This method is only intended to be called by a SceneSafeMpSpawner that has entered the tree.
@@ -167,6 +168,13 @@ func _cleanup_peer_data(peer: int):
 		synchronizer_map[key].confirmed_peers.erase(peer);
 		if synchronizer_map[key].confirmed_peers.size() == 0:
 			synchronizer_map.erase(key);
+
+
+## Clean up all data from all of the confirmed peers lists.
+func cleanup_all_data():
+	spawner_map = {}
+	
+	synchronizer_map = {}
 
 
 @rpc("any_peer", "call_local", "reliable")
